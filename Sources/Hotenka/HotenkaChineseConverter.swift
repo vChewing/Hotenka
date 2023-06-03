@@ -1,27 +1,27 @@
 // Swiftified by (c) 2022 and onwards The vChewing Project (MIT-NTL License).
 // Rebranded from (c) Nick Chen's Obj-C library "NCChineseConverter" (MIT License).
 /*
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-the Software, and to permit persons to whom the Software is furnished to do so,
-subject to the following conditions:
+ Permission is hereby granted, free of charge, to any person obtaining a copy of
+ this software and associated documentation files (the "Software"), to deal in
+ the Software without restriction, including without limitation the rights to
+ use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ the Software, and to permit persons to whom the Software is furnished to do so,
+ subject to the following conditions:
 
-1. The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
+ 1. The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
 
-2. No trademark license is granted to use the trade names, trademarks, service
-marks, or product names of Contributor, except as required to fulfill notice
-requirements above.
+ 2. No trademark license is granted to use the trade names, trademarks, service
+ marks, or product names of Contributor, except as required to fulfill notice
+ requirements above.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 
 import Foundation
 
@@ -53,6 +53,20 @@ public class HotenkaChineseConverter {
       dict = rawPlist
     } catch {
       NSLog("// Exception happened when reading dict plist at: \(plistDir).")
+      dict = .init()
+    }
+  }
+
+  public init(jsonDir: String) {
+    dictFiles = .init()
+    do {
+      let rawData = try Data(contentsOf: URL(fileURLWithPath: jsonDir))
+      guard let rawJSON: [String: [String: String]] = try JSONSerialization.jsonObject(with: rawData) as? [String: [String: String]] else {
+        throw NSError()
+      }
+      dict = rawJSON
+    } catch {
+      NSLog("// Exception happened when reading dict json at: \(jsonDir).")
       dict = .init()
     }
   }
@@ -127,25 +141,25 @@ public class HotenkaChineseConverter {
     var dictTypeKey: String
 
     switch dictType {
-      case .zhHantTW:
-        dictTypeKey = "zh2TW"
-      case .zhHantHK:
-        dictTypeKey = "zh2HK"
-      case .zhHansSG:
-        dictTypeKey = "zh2SG"
-      case .zhHansJP:
-        dictTypeKey = "zh2JP"
-      case .zhHantKX:
-        dictTypeKey = "zh2KX"
-      case .zhHansCN:
-        dictTypeKey = "zh2CN"
+    case .zhHantTW:
+      dictTypeKey = "zh2TW"
+    case .zhHantHK:
+      dictTypeKey = "zh2HK"
+    case .zhHansSG:
+      dictTypeKey = "zh2SG"
+    case .zhHansJP:
+      dictTypeKey = "zh2JP"
+    case .zhHantKX:
+      dictTypeKey = "zh2KX"
+    case .zhHansCN:
+      dictTypeKey = "zh2CN"
     }
 
     var result = ""
     guard let useDict = dict[dictTypeKey] else { return target }
 
     var i = 0
-    outerloop: while i < (target.count) {
+    while i < (target.count) {
       let max = (target.count) - i
       var j: Int
       j = max
@@ -153,7 +167,7 @@ public class HotenkaChineseConverter {
       innerloop: while j > 0 {
         let start = target.index(target.startIndex, offsetBy: i)
         let end = target.index(target.startIndex, offsetBy: i + j)
-        guard let useDictSubStr = useDict[String(target[start..<end])] else {
+        guard let useDictSubStr = useDict[String(target[start ..< end])] else {
           j -= 1
           continue
         }
@@ -164,7 +178,7 @@ public class HotenkaChineseConverter {
       if j == 0 {
         let start = target.index(target.startIndex, offsetBy: i)
         let end = target.index(target.startIndex, offsetBy: i + 1)
-        result = result + String(target[start..<end])
+        result = result + String(target[start ..< end])
         i += 1
       } else {
         i += j
@@ -177,18 +191,18 @@ public class HotenkaChineseConverter {
 
 // MARK: - String extensions
 
-extension String {
-  fileprivate func range(of str: String) -> Range<Int> {
+private extension String {
+  func range(of str: String) -> Range<Int> {
     var start = -1
     withCString { bytes in
       str.withCString { sbytes in
         start = strstr(bytes, sbytes) - UnsafeMutablePointer<Int8>(mutating: bytes)
       }
     }
-    return start < 0 ? 0..<0 : start..<start + str.utf8.count
+    return start < 0 ? 0 ..< 0 : start ..< start + str.utf8.count
   }
 
-  fileprivate func substring(to index: Int) -> String {
+  func substring(to index: Int) -> String {
     var out = self
     withCString { bytes in
       let bytes = UnsafeMutablePointer<Int8>(mutating: bytes)
@@ -198,7 +212,7 @@ extension String {
     return out
   }
 
-  fileprivate func substring(from index: Int) -> String {
+  func substring(from index: Int) -> String {
     var out = self
     withCString { bytes in
       out = String(cString: bytes + index)
