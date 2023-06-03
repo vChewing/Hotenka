@@ -137,7 +137,7 @@ public class HotenkaChineseConverter {
 
   // MARK: - Public Methods
 
-  func convert(_ target: String, to dictType: DictType) -> String {
+  public func convert(_ target: String, to dictType: DictType) -> String {
     var dictTypeKey: String
 
     switch dictType {
