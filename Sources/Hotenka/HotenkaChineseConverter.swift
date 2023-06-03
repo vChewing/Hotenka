@@ -57,6 +57,20 @@ public class HotenkaChineseConverter {
     }
   }
 
+  public init(jsonDir: String) {
+    dictFiles = .init()
+    do {
+      let rawData = try Data(contentsOf: URL(fileURLWithPath: jsonDir))
+      guard let rawJSON: [String: [String: String]] = try JSONSerialization.jsonObject(with: rawData) as? [String: [String: String]] else {
+        throw NSError()
+      }
+      dict = rawJSON
+    } catch {
+      NSLog("// Exception happened when reading dict json at: \(jsonDir).")
+      dict = .init()
+    }
+  }
+
   public init(dictDir: String) {
     dictFiles = [
       "zh2TW": [String](),
