@@ -24,6 +24,7 @@
  */
 
 import Foundation
+import SQLite3
 
 #if os(Linux)
   import Glibc
@@ -43,6 +44,25 @@ public enum DictType {
 public class HotenkaChineseConverter {
   private(set) var dict: [String: [String: String]]
   private var dictFiles: [String: [String]]
+  var ptrSQL: OpaquePointer?
+  var ptrStatement: OpaquePointer?
+
+  deinit {
+    sqlite3_finalize(ptrStatement)
+    sqlite3_close_v2(ptrSQL)
+    ptrSQL = nil
+    ptrStatement = nil
+  }
+
+  public init(sqliteDir dbPath: String) {
+    dict = .init()
+    dictFiles = .init()
+    guard sqlite3_open(dbPath, &ptrSQL) == SQLITE_OK else {
+      NSLog("// Exception happened when connecting to SQLite database at: \(dbPath).")
+      ptrSQL = nil
+      return
+    }
+  }
 
   public init(plistDir: String) {
     dictFiles = .init()
@@ -137,26 +157,42 @@ public class HotenkaChineseConverter {
 
   // MARK: - Public Methods
 
-  public func convert(_ target: String, to dictType: DictType) -> String {
-    var dictTypeKey: String
-
+  private static func dictTypeKey(_ dictType: DictType) -> String {
     switch dictType {
     case .zhHantTW:
-      dictTypeKey = "zh2TW"
+      return "zh2TW"
     case .zhHantHK:
-      dictTypeKey = "zh2HK"
+      return "zh2HK"
     case .zhHansSG:
-      dictTypeKey = "zh2SG"
+      return "zh2SG"
     case .zhHansJP:
-      dictTypeKey = "zh2JP"
+      return "zh2JP"
     case .zhHantKX:
-      dictTypeKey = "zh2KX"
+      return "zh2KX"
     case .zhHansCN:
-      dictTypeKey = "zh2CN"
+      return "zh2CN"
     }
+  }
+
+  public func query(dict dictTypeKey: String, key searchKey: String) -> String? {
+    guard ptrSQL != nil else { return dict[dictTypeKey]?[searchKey] }
+    let sqlQuery = "SELECT * FROM DATA_HOTENKA WHERE dict='\(dictTypeKey)' AND theKey='\(searchKey)';"
+    sqlite3_prepare_v2(ptrSQL, (sqlQuery as NSString).utf8String, -1, &ptrStatement, nil)
+    // 此處只需要用到第一筆結果。
+    while sqlite3_step(ptrStatement) == SQLITE_ROW {
+      guard let rawValue = sqlite3_column_text(ptrStatement, 3) else { continue }
+      return String(cString: rawValue)
+    }
+    return nil
+  }
+
+  public func convert(_ target: String, to dictType: DictType) -> String {
+    let dictTypeKey: String = Self.dictTypeKey(dictType)
 
     var result = ""
-    guard let useDict = dict[dictTypeKey] else { return target }
+    if ptrSQL == nil {
+      guard dict[dictTypeKey] != nil else { return target }
+    }
 
     var i = 0
     while i < (target.count) {
@@ -167,7 +203,7 @@ public class HotenkaChineseConverter {
       innerloop: while j > 0 {
         let start = target.index(target.startIndex, offsetBy: i)
         let end = target.index(target.startIndex, offsetBy: i + j)
-        guard let useDictSubStr = useDict[String(target[start ..< end])] else {
+        guard let useDictSubStr = query(dict: dictTypeKey, key: String(target[start ..< end])) else {
           j -= 1
           continue
         }
