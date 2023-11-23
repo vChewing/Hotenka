@@ -48,7 +48,7 @@ extension HotenkaTests {
       "HOTENKA: SQLite Database Initialization Error."
     )
     XCTAssertTrue(
-      sqlite3_exec(ptrSQL, ("PRAGMA synchronous = OFF;" as NSString).utf8String, nil, nil, nil) == SQLITE_OK,
+      sqlite3_exec(ptrSQL, "PRAGMA synchronous = OFF;", nil, nil, nil) == SQLITE_OK,
       "HOTENKA: SQLite synchronous OFF failed."
     )
 
@@ -63,11 +63,11 @@ extension HotenkaTests {
     """
 
     XCTAssertTrue(
-      sqlite3_exec(ptrSQL, (sqlMakeTableHotenka as NSString).utf8String, nil, nil, nil) == SQLITE_OK,
+      sqlite3_exec(ptrSQL, sqlMakeTableHotenka, nil, nil, nil) == SQLITE_OK,
       "HOTENKA: SQLite Table Creation Failed."
     )
 
-    assert(sqlite3_exec(ptrSQL, ("begin;" as NSString).utf8String, nil, nil, nil) == SQLITE_OK)
+    assert(sqlite3_exec(ptrSQL, "begin;", nil, nil, nil) == SQLITE_OK)
 
     var ptrStatement: OpaquePointer?
 
@@ -77,7 +77,7 @@ extension HotenkaTests {
         let sqlInsertion = "INSERT INTO DATA_HOTENKA (dict, theKey, theValue) VALUES (\(dictID), '\(key)', '\(value)')"
         assert(
           sqlite3_prepare_v2(
-            ptrSQL, (sqlInsertion as NSString).utf8String, -1, &ptrStatement, nil
+            ptrSQL, sqlInsertion, -1, &ptrStatement, nil
           ) == SQLITE_OK,
           "HOTENKA: Failed from preparing: \(sqlInsertion)"
         )
@@ -88,7 +88,7 @@ extension HotenkaTests {
       }
     }
 
-    assert(sqlite3_exec(ptrSQL, ("commit;" as NSString).utf8String, nil, nil, nil) == SQLITE_OK)
+    assert(sqlite3_exec(ptrSQL, "commit;", nil, nil, nil) == SQLITE_OK)
 
     sqlite3_close_v2(ptrSQL)
   }

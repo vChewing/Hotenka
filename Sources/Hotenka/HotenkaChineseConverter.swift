@@ -181,7 +181,7 @@ public class HotenkaChineseConverter {
   public func query(dict dictType: DictType, key searchKey: String) -> String? {
     guard ptrSQL != nil else { return dict[dictType.rawKeyString]?[searchKey] }
     let sqlQuery = "SELECT * FROM DATA_HOTENKA WHERE dict=\(dictType.rawValue) AND theKey='\(searchKey)';"
-    sqlite3_prepare_v2(ptrSQL, (sqlQuery as NSString).utf8String, -1, &ptrStatement, nil)
+    sqlite3_prepare_v2(ptrSQL, sqlQuery, -1, &ptrStatement, nil)
     // 此處只需要用到第一筆結果。
     while sqlite3_step(ptrStatement) == SQLITE_ROW {
       guard let rawValue = sqlite3_column_text(ptrStatement, 2) else { continue }
