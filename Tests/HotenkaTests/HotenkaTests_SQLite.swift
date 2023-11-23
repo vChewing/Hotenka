@@ -87,7 +87,7 @@ extension HotenkaTests {
         )
       }
     }
-
+    sqlite3_finalize(ptrStatement)
     assert(sqlite3_exec(ptrSQL, "commit;", nil, nil, nil) == SQLITE_OK)
 
     sqlite3_close_v2(ptrSQL)
