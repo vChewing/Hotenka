@@ -69,11 +69,10 @@ extension HotenkaTests {
 
     assert(sqlite3_exec(ptrSQL, "begin;", nil, nil, nil) == SQLITE_OK)
 
-    var ptrStatement: OpaquePointer?
-
     testInstance.dict.forEach { dictName, subDict in
       guard let dictID = DictType.match(rawKeyString: dictName)?.rawValue else { return }
       subDict.forEach { key, value in
+        var ptrStatement: OpaquePointer?
         let sqlInsertion = "INSERT INTO DATA_HOTENKA (dict, theKey, theValue) VALUES (\(dictID), '\(key)', '\(value)')"
         assert(
           sqlite3_prepare_v2(
@@ -85,11 +84,11 @@ extension HotenkaTests {
           sqlite3_step(ptrStatement) == SQLITE_DONE,
           "HOTENKA: Failed from stepping: \(sqlInsertion)"
         )
+        sqlite3_finalize(ptrStatement)
+        ptrStatement = nil
       }
     }
-    sqlite3_finalize(ptrStatement)
     assert(sqlite3_exec(ptrSQL, "commit;", nil, nil, nil) == SQLITE_OK)
-
     sqlite3_close_v2(ptrSQL)
   }
 

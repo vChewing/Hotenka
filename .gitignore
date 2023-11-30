@@ -228,3 +228,5 @@ _UpgradeReport_Files/
 __pycache__/
 ~$*
 *.sqlite
+*.plist
+*.json
