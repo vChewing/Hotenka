@@ -23,7 +23,6 @@
  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import Foundation
 import XCTest
 
 @testable import Hotenka
@@ -40,7 +39,10 @@ extension HotenkaTests {
     let testInstance: HotenkaChineseConverter = .init(dictDir: testDataPath)
     NSLog("// Loading complete. Generating json dict file.")
     do {
-      try JSONSerialization.data(withJSONObject: testInstance.dict, options: .sortedKeys).write(to: URL(fileURLWithPath: testDataPath + "convdict.json"))
+      let urlOutput = URL(fileURLWithPath: testDataPath + "convdict.json")
+      let encoder = JSONEncoder()
+      encoder.outputFormatting = .sortedKeys
+      try encoder.encode(testInstance.dict).write(to: urlOutput, options: .atomic)
     } catch {
       NSLog("// Error on writing strings to file: \(error)")
     }
