@@ -86,10 +86,25 @@ extension HotenkaTests {
         // bind values
         _ = sqlite3_bind_int(ptrStatement, 1, Int32(dictID))
         let k = (key as NSString).utf8String
-        _ = sqlite3_bind_text(ptrStatement, 2, k, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
+        _ = sqlite3_bind_text(
+          ptrStatement,
+          2,
+          k,
+          -1,
+          unsafeBitCast(-1, to: sqlite3_destructor_type.self)
+        )
         let v = (value as NSString).utf8String
-        _ = sqlite3_bind_text(ptrStatement, 3, v, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
-        assert(sqlite3_step(ptrStatement) == SQLITE_DONE, "HOTENKA: Failed from stepping: bound insert")
+        _ = sqlite3_bind_text(
+          ptrStatement,
+          3,
+          v,
+          -1,
+          unsafeBitCast(-1, to: sqlite3_destructor_type.self)
+        )
+        assert(
+          sqlite3_step(ptrStatement) == SQLITE_DONE,
+          "HOTENKA: Failed from stepping: bound insert"
+        )
         sqlite3_finalize(ptrStatement)
         ptrStatement = nil
       }

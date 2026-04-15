@@ -160,7 +160,8 @@ public final class HotenkaChineseConverter {
     let enumerator = FileManager.default.enumerator(atPath: dictDir)
     guard let filePaths = enumerator?.allObjects as? [String] else { return }
     // 以 fileURLWithPath + appendingPathComponent 的方式建立檔案 URL，避免 URL(string:) 解析為網路 URL
-    let arrFiles = filePaths.filter { $0.contains(".txt") }.map { baseURL.appendingPathComponent($0) }
+    let arrFiles = filePaths.filter { $0.contains(".txt") }
+      .map { baseURL.appendingPathComponent($0) }
     for theURL in arrFiles {
       let fullFilename = theURL.lastPathComponent
       let mainFilename = fullFilename.substring(to: fullFilename.range(of: ".").lowerBound)
@@ -220,7 +221,13 @@ public final class HotenkaChineseConverter {
     // 綁定 dict 與 key
     _ = sqlite3_bind_int(ptrStatement, 1, Int32(dictType.rawValue))
     let cKey = (searchKey as NSString).utf8String
-    _ = sqlite3_bind_text(ptrStatement, 2, cKey, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
+    _ = sqlite3_bind_text(
+      ptrStatement,
+      2,
+      cKey,
+      -1,
+      unsafeBitCast(-1, to: sqlite3_destructor_type.self)
+    )
     // 此處只需要用到第一筆結果。
     while sqlite3_step(ptrStatement) == SQLITE_ROW {
       // 因為 SELECT theValue 回傳的是第 0 欄位
