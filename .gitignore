@@ -138,10 +138,10 @@ $tf/
 .Spotlight-V100
 .swiftpm
 .TemporaryItems
+.tmp
 .Trashes
 .VolumeIcon.icns
 .vs/
-.vscode
 ._*
 aclocal.m4
 AppPackages/
@@ -227,6 +227,5 @@ _TeamCity*
 _UpgradeReport_Files/
 __pycache__/
 ~$*
-*.sqlite
-*.plist
-*.json
+.index-build/
+tmp/
