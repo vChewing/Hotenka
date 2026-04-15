@@ -1,14 +1,18 @@
-name: unit-test
-on: [push]
+name: unit-test-typewriter-linux
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
   build:
-    name: unit-test
-    runs-on: macOS-latest
+    name: test-linux-typewriter
+    runs-on: ubuntu-latest
     env:
         GIT_SSL_NO_VERIFY: true
-        DEVELOPER_DIR: /Applications/Xcode.app/Contents/Developer
     steps:
+      - uses: SwiftyLab/setup-swift@latest
       - uses: actions/checkout@v1
-      - name: test
+      - name: Test
         run: swift test
